@@ -1,0 +1,9 @@
+reference/*
+input/*
+output/*
+!reference/.gitkeep
+!input/.gitkeep
+!output/.gitkeep
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
