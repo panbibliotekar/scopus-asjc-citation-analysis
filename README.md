@@ -12,4 +12,8 @@ Analyses use documented input requirements, deterministic procedures where appli
 
 ## Data
 
-Scopus exports and licensed reference datasets are not included. Users must provide their own authorised data.
+The accompanying dataset is available on Zenodo:
+
+Nazarovets, S., & Fraisier-Vannier, O. (2026). *Journal subject classifications and article-level disciplinary assessment: Evidence from Ukrainian Q1 journals* [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.24346476
+
+The dataset includes journal-level CiteScore/ASJC indicators and independent article-level subject classifications for 50 sampled articles. Full Scopus exports and licensed reference datasets are not included; users must provide their own authorised source data.
