@@ -1,62 +1,34 @@
-"""Reproduce Figure 1 for the journal classification anomalies manuscript.
+"""Reproduce revised Figure 1 using the Zenodo dataset.
 
-Values transcribed from manuscript Tables 1; verify against source data before publication.
-Requires: matplotlib, pandas.
+Download journal_citescore_2025_zenodo.csv from
+https://doi.org/10.5281/zenodo.24541791
+Usage: python scripts/figure_1_citescore_percentiles.py path/to/journal_citescore_2025_zenodo.csv
+Requires pandas and matplotlib.
 """
 import pandas as pd
 import matplotlib.pyplot as plt
 import textwrap
+from pathlib import Path
+import sys
 
-data = [
-    ("Banks and Bank Systems", 44, 85),
-    ("Carpathian Mathematical Publications", 80, 80),
-    ("Environmental Economics", 48, 90),
-    ("History of Science and Technology", 74, 91),
-    ("Innovative Marketing", 45, 86),
-    ("Investment Management and Financial Innovations", 55, 81),
-    ("Journal of Edge Computing", 76, 82),
-    ("Knowledge and Performance Management", 47, 89),
-    ("Mining of Mineral Deposits", 78, 85),
-    ("Problems and Perspectives in Management", 53, 86),
-    ("Psycholinguistics", 28, 79),
-    ("Public and Municipal Finance", 53, 80),
-    ("Ukrainian Geographical Journal", 25, 76),
-    ("Ukrainian Journal of Physical Optics", 88, 88),
-    ("Ukrainian Numismatic Annual", 77, 87),
-]
-df = pd.DataFrame(data, columns=["Journal", "Lowest", "Highest"])
-
-def wrap_journal_name(name, width=35):
-    return "\n".join(textwrap.wrap(name, width=width, break_long_words=False))
-
-df["Journal_label"] = df["Journal"].apply(wrap_journal_name)
-
-fig, ax = plt.subplots(figsize=(18, 13))
+source = Path(sys.argv[1]) if len(sys.argv)>1 else Path('data/journal_citescore_2025_zenodo.csv')
+df = pd.read_csv(source).sort_values(['Worst percentile','Best percentile','Titles']).reset_index(drop=True)
 y = range(len(df))
-for i, row in df.iterrows():
-    ax.plot([row["Lowest"], row["Highest"]], [i, i],
-            color="0.60", linewidth=2, zorder=1)
-ax.scatter(df["Lowest"], y, color="#2166AC", s=100,
-           label="Lowest percentile", zorder=3)
-ax.scatter(df["Highest"], y, color="#D95F02", s=100,
-           label="Highest percentile", zorder=4)
-ax.set_yticks(list(y))
-ax.set_yticklabels(df["Journal_label"], fontsize=20, fontweight="medium", linespacing=1.1)
+fig, ax = plt.subplots(figsize=(12,8))
+ax.hlines(y, df['Worst percentile'], df['Best percentile'], color='0.60', linewidth=1.8)
+ax.scatter(df['Worst percentile'], y, color='#2166AC', s=65, label='Lowest percentile', zorder=3)
+ax.scatter(df['Best percentile'], y, color='#D95F02', s=65, label='Highest percentile', zorder=4)
+ax.set_yticks(list(y), ['\n'.join(textwrap.wrap(t, 38)) for t in df.Titles], fontsize=11)
 ax.invert_yaxis()
-ax.set_xlim(20, 100)
-ax.set_xticks(range(20, 101, 10))
-ax.set_xlabel("CiteScore 2025 percentile", fontsize=20, labelpad=12)
-ax.tick_params(axis="x", labelsize=16)
-ax.axvline(75, color="0.45", linestyle="--", linewidth=1.2, alpha=0.7)
-ax.grid(axis="x", color="0.88", linestyle=":", linewidth=0.9)
+ax.set_xlim(0,100)
+ax.set_xticks(range(0,101,10))
+ax.set_xlabel('CiteScore 2025 percentile', fontsize=12)
+ax.axvline(75, color='0.4', linestyle='--', linewidth=1.2, label='Q1 threshold')
+ax.grid(axis='x', color='0.88', linestyle=':')
 ax.set_axisbelow(True)
-for spine in ["top", "right", "left"]:
-    ax.spines[spine].set_visible(False)
-ax.tick_params(axis="y", length=0, pad=12)
-ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.08),
-          ncol=2, frameon=False, fontsize=16)
-fig.subplots_adjust(left=0.46, right=0.97, top=0.97, bottom=0.13)
-fig.savefig("Figure_1_CiteScore_percentiles.pdf", bbox_inches="tight")
-fig.savefig("Figure_1_CiteScore_percentiles.png",
-            dpi=600, bbox_inches="tight")
-plt.show()
+for spine in ['top','right','left']: ax.spines[spine].set_visible(False)
+ax.tick_params(axis='y', length=0, pad=8)
+h,l=ax.get_legend_handles_labels(); ax.legend([h[i] for i in [0,1,2]],[l[i] for i in [0,1,2]],loc='upper center',bbox_to_anchor=(0.5,-0.09),ncol=3,frameon=False)
+fig.subplots_adjust(left=0.37,right=0.96,top=0.97,bottom=0.15)
+fig.savefig('Figure_1_final.pdf',bbox_inches='tight')
+fig.savefig('Figure_1_final.png',dpi=300,bbox_inches='tight')
